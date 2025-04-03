@@ -1,4 +1,4 @@
-  pull_requestname: My GitHub Actions Pipeline
+name: My GitHub Actions Pipeline
 
 on:
   push:
