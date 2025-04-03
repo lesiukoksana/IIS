@@ -1,4 +1,4 @@
-name: My GitHub Actions Pipeline
+name: Build and Test
 
 on:
   push:
@@ -9,8 +9,35 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Build code
-      run: echo "Building the project..."
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Start server on localhost
+      run: |
+        # Запуск сервера на локальному хості (наприклад, якщо ваш сервер працює на порту 3000)
+        nohup npm run start & # Використовується для запуску процесу в фоновому режимі
+
+    - name: Wait for the server to start
+      run: sleep 5 # Очікуємо кілька секунд, щоб сервер запустився
+
+    - name: Build project
+      run: npm run build
+
+    - name: Run tests
+      run: npm test
+
+    - name: Stop server
+      run: |
+        # Зупинка сервера після тестів
+        kill $(ps aux | grep 'npm run start' | awk '{print $1}')
+
