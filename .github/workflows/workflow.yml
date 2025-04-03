@@ -1,8 +1,3 @@
-name: Build and Test
-
-on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -16,28 +11,47 @@ jobs:
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
-      with:
-        node-version: 18
+ name: GitHub Actions Pipeline
 
-    - name: Install dependencies
-      run: npm install
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-    - name: Start server on localhost
-      run: |
-        # Запуск сервера на локальному хості (наприклад, якщо ваш сервер працює на порту 3000)
-        nohup npm run start & # Використовується для запуску процесу в фоновому режимі
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-    - name: Wait for the server to start
-      run: sleep 5 # Очікуємо кілька секунд, щоб сервер запустився
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Build project
-      run: npm run build
+      - name: Set up Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18 # Або інша необхідна версія
 
-    - name: Run tests
-      run: npm test
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Stop server
-      run: |
-        # Зупинка сервера після тестів
-        kill $(ps aux | grep 'npm run start' | awk '{print $1}')
+      - name: Launch Application
+        run: |
+          npm run dev &
+          echo $! > app.pid
+          sleep 10
+
+      - name: Verify Application is Running
+        run: |
+          curl --silent --fail http://localhost:8080 || { kill $(cat app.pid) && exit 1; }
+
+      - name: Terminate Application
+        run: |
+          kill $(cat app.pid)
+          rm -f app.pid
+
+      - name: Build the Application
+        run: npm run build
 
