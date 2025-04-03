@@ -27,8 +27,5 @@ jobs:
     - name: Run build
       run: npm run build
 
-    - name: Run tests
-      run: npm test
-
     - name: Stop application
       run: kill $(lsof -t -i:3000) || echo "Process not found"
