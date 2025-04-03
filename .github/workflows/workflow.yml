@@ -1,75 +1,34 @@
 name: My GitHub Actions Pipeline
 
-
-
 on:
-
   push:
-
     branches: [ main ]
-
   pull_request:
-
     branches: [ main ]
-
-
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-
-
-
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Checkout code
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
 
-        uses: actions/checkout@v2
+    - name: Install dependencies
+      run: npm install
 
+    - name: Start application
+      run: npm start &
 
+    - name: Run build
+      run: npm run build
 
-      - name: Set up Node.js
+    - name: Run tests
+      run: npm test
 
-        uses: actions/setup-node@v3
-
-        with:
-
-          node-version: 18 # Або версія, яка тобі потрібна
-
-
-
-      - name: Install dependencies
-
-        run: npm install
-
-
-
-      - name: Start Application
-
-        run: |
-
-          npm run dev &
-
-          echo $! > app.pid
-
-          sleep 10
-
-      - name: Check Application
-
-        run: |
-
-          curl --silent --fail http://localhost:8080 || (kill $(cat app.pid) && exit 1)
-
-      - name: Stop Application
-
-        run: |
-
-          kill $(cat app.pid)
-
-          rm -f app.pid
-
-      - name: Build Application
-
-        run: npm run build
+    - name: Stop application
+      run: kill $(lsof -t -i:3000) || echo "Process not found"
