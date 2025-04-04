@@ -21,11 +21,11 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Start application
-      run: npm run dev
-
-    - name: Run build
+    - name: Build
       run: npm run build
+
+    - name: Run Start
+      run: npm run dev
 
     - name: Stop application
       run: kill $(lsof -t -i:3000) || echo "Process not found"
