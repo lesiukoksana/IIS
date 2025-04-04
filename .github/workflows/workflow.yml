@@ -27,5 +27,11 @@ jobs:
     - name: Run Start
       run: npm run dev
 
-    - name: Stop application
-      run: kill $(lsof -t -i:8080) || echo "Process not found"
+    - name: Check application
+      run: |
+        curl --silent --fail http://localhost:8080 || (kill $(cat app.pid) && exit 1)
+
+    - name: Stop production server
+      run: |
+          kill $(cat app.pid)
+          rm -f app.pid
