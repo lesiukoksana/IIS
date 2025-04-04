@@ -10,28 +10,31 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Build
-      run: npm run build
+      - name: Build
+        run: npm run build
 
-    - name: Run Start
-      run: npm run dev
+      - name: Run Start
+        run: |
+          nohup npm run dev > app.log 2>&1 &
+          echo $! > app.pid
 
-    - name: Check application
-      run: |
-        curl --silent --fail http://localhost:8080 || (kill $(cat app.pid) && exit 1)
+      - name: Check application
+        run: |
+          sleep 5
+          curl --silent --fail http://localhost:8080 || (kill $(cat app.pid) && exit 1)
 
-    - name: Stop production server
-      run: |
+      - name: Stop production server
+        run: |
           kill $(cat app.pid)
           rm -f app.pid
